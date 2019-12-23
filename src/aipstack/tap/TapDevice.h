@@ -24,8 +24,9 @@
 
 #ifndef AIPSTACK_TAP_DEVICE_H
 #define AIPSTACK_TAP_DEVICE_H
-
-#if defined(__linux__)
+#if defined(__VIRTUAL_AIP_STACK__)
+#include <aipstack/tap/linux/TapDeviceVirtual.h>
+#elif defined(__linux__)
 #include <aipstack/tap/linux/TapDeviceLinux.h>
 #elif defined(_WIN32)
 #include <aipstack/tap/windows/TapDeviceWindows.h>

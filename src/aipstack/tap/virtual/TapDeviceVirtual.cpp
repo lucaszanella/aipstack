@@ -44,15 +44,16 @@
 #include <aipstack/proto/EthernetProto.h>
 #include <aipstack/tap/virtual/TapDeviceVirtual.h>
 
-namespace AIpStack {
-
-TapDeviceVirtual::TapDeviceVirtual (
-    AIpStack::EventLoop &loop, std::string const &device_id, FrameReceivedHandler handler)
-:
-    m_handler(handler),
-    m_fd_watcher(loop, AIPSTACK_BIND_MEMBER(&TapDeviceVirtual::handleFdEvents, this)),
-    m_active(true)
+namespace AIpStack
 {
+
+TapDeviceVirtual::TapDeviceVirtual(
+    AIpStack::EventLoop &loop, std::string const &device_id, FrameReceivedHandler handler)
+    : m_handler(handler),
+      //m_fd_watcher(loop, AIPSTACK_BIND_MEMBER(&TapDeviceVirtual::handleFdEvents, this)),
+      m_active(true)
+{
+    /*
     m_fd = AIpStack::FileDescriptorWrapper{::open("/dev/net/tun", O_RDWR)};
     if (!m_fd) {
         throw std::runtime_error("Failed to open /dev/net/tun.");
@@ -91,39 +92,46 @@ TapDeviceVirtual::TapDeviceVirtual (
         
         m_frame_mtu = std::size_t(ifr.ifr_mtu) + AIpStack::EthHeader::Size;
     }
-    
+    */
+
+    m_frame_mtu = 1500;
+
     m_read_buffer.resize(m_frame_mtu);
     m_write_buffer.resize(m_frame_mtu);
-    
+
     m_fd_watcher.initFd(*m_fd, AIpStack::EventLoopFdEvents::Read);
 }
 
-TapDeviceVirtual::~TapDeviceVirtual ()
-{}
+TapDeviceVirtual::~TapDeviceVirtual()
+{
+}
 
-std::size_t TapDeviceVirtual::getMtu () const
+std::size_t TapDeviceVirtual::getMtu() const
 {
     return m_frame_mtu;
 }
 
-AIpStack::IpErr TapDeviceVirtual::sendFrame (AIpStack::IpBufRef frame)
+AIpStack::IpErr TapDeviceVirtual::sendFrame(AIpStack::IpBufRef frame)
 {
-    if (!m_active) {
+    if (!m_active)
+    {
         return AIpStack::IpErr::HardwareError;
     }
-    
-    if (frame.tot_len < AIpStack::EthHeader::Size) {
+
+    if (frame.tot_len < AIpStack::EthHeader::Size)
+    {
         return AIpStack::IpErr::HardwareError;
     }
-    else if (frame.tot_len > m_frame_mtu) {
+    else if (frame.tot_len > m_frame_mtu)
+    {
         return AIpStack::IpErr::PacketTooLarge;
     }
-    
+
     char *buffer = m_write_buffer.data();
-    
+
     std::size_t len = frame.tot_len;
     frame = ipBufTakeBytes(frame, len, buffer);
-    
+    /*
     auto write_res = ::write(*m_fd, buffer, len);
     if (write_res < 0) {
         int error = errno;
@@ -135,54 +143,71 @@ AIpStack::IpErr TapDeviceVirtual::sendFrame (AIpStack::IpBufRef frame)
     if (std::size_t(write_res) != len) {
         return AIpStack::IpErr::HardwareError;
     }
-    
+    */
     return AIpStack::IpErr::Success;
 }
 
-void TapDeviceVirtual::handleFdEvents (AIpStack::EventLoopFdEvents events)
+void TapDeviceVirtual::receive()
+{
+    AIpStack::IpBufNode node{
+        m_read_buffer.data(),
+        std::size_t(read_res),
+        nullptr};
+
+    AIPSTACK_ASSERT(std::size_t(read_res) <= m_frame_mtu);
+
+    m_handler(AIpStack::IpBufRef{&node, 0, std::size_t(read_res)});
+}
+/*
+void TapDeviceVirtual::handleFdEvents(AIpStack::EventLoopFdEvents events)
 {
     AIPSTACK_ASSERT(m_active);
-    
-    do {
-        if ((events & AIpStack::EventLoopFdEvents::Error) != AIpStack::Enum0) {
+
+    do
+    {
+        if ((events & AIpStack::EventLoopFdEvents::Error) != AIpStack::Enum0)
+        {
             std::fprintf(stderr, "TapDeviceVirtual: Error event. Stopping.\n");
             goto error;
         }
-        if ((events & AIpStack::EventLoopFdEvents::Hup) != AIpStack::Enum0) {
+        if ((events & AIpStack::EventLoopFdEvents::Hup) != AIpStack::Enum0)
+        {
             std::fprintf(stderr, "TapDeviceVirtual: HUP event. Stopping.\n");
             goto error;
         }
-        
+
         auto read_res = ::read(*m_fd, m_read_buffer.data(), m_frame_mtu);
-        if (read_res <= 0) {
+        if (read_res <= 0)
+        {
             bool is_error = false;
-            if (read_res < 0) {
+            if (read_res < 0)
+            {
                 int err = errno;
                 is_error = !AIpStack::FileDescriptorWrapper::errIsEAGAINorEWOULDBLOCK(err);
             }
-            if (is_error) {
+            if (is_error)
+            {
                 std::fprintf(stderr, "TapDeviceVirtual: read failed. Stopping.\n");
                 goto error;
             }
             return;
         }
-        
+
         AIPSTACK_ASSERT(std::size_t(read_res) <= m_frame_mtu);
-        
+
         AIpStack::IpBufNode node{
             m_read_buffer.data(),
             std::size_t(read_res),
-            nullptr
-        };
-        
+            nullptr};
+
         m_handler(AIpStack::IpBufRef{&node, 0, std::size_t(read_res)});
     } while (false);
-    
+
     return;
-    
+
 error:
     m_fd_watcher.reset();
     m_active = false;
 }
-
-}
+*/
+} // namespace AIpStack

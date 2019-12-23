@@ -53,20 +53,24 @@
 #define AIPSTACK_EVENT_LOOP_HAS_IOCP PLATFORM_DEPENDENT
 
 #else
-
+//Virtual AIP stack means we don't depend on anything from the OS
+#if defined(__VIRTUAL_AIP_STACK__)
+#define AIPSTACK_EVENT_LOOP_HAS_FD 0
+#define AIPSTACK_EVENT_LOOP_HAS_IOCP 0
+#else
 #if defined(__linux__)
 #define AIPSTACK_EVENT_LOOP_HAS_FD 1
 #else
 #define AIPSTACK_EVENT_LOOP_HAS_FD 0
-#endif
+#endif //#if defined(__linux__)
 
 #if defined(_WIN32)
 #define AIPSTACK_EVENT_LOOP_HAS_IOCP 1
 #else
 #define AIPSTACK_EVENT_LOOP_HAS_IOCP 0
-#endif
-
-#endif
+#endif //#if defined(_WIN32)
+#endif //#if defined(__VIRTUAL_AIP_STACK__)
+#endif //#ifdef IN_DOXYGEN
 
 /** @} */
 
@@ -74,7 +78,8 @@
 #include <windows.h>
 #endif
 
-namespace AIpStack {
+namespace AIpStack
+{
 
 /**
  * @addtogroup event-loop
@@ -115,12 +120,13 @@ using EventLoopTime = EventLoopClock::time_point;
 using EventLoopDuration = EventLoopClock::duration;
 
 #ifndef IN_DOXYGEN
-class EventProviderBase {
+class EventProviderBase
+{
 public:
-    inline bool dispatchAsyncSignals ();
-    #if AIPSTACK_EVENT_LOOP_HAS_IOCP
-    inline bool handleIocpResult (void *completion_key, OVERLAPPED *overlapped);
-    #endif
+    inline bool dispatchAsyncSignals();
+#if AIPSTACK_EVENT_LOOP_HAS_IOCP
+    inline bool handleIocpResult(void *completion_key, OVERLAPPED *overlapped);
+#endif
 };
 #endif
 
@@ -147,26 +153,28 @@ public:
  * 
  * Operators provided by @ref AIPSTACK_ENUM_BITFIELD are available.
  */
-enum class EventLoopFdEvents {
-    Zero  = 0, /**< Zero value representing no events. */
-    Read  = 1 << 0, /**< Ready for reading. */
-    Write = 1 << 1, /**< Ready for writing. */
-    Error = 1 << 2, /**< Error occurred. */
-    Hup   = 1 << 3, /**< Hangup occurred. */
-    All   = Read|Write|Error|Hup, /**< Mask of all above event types listed above. */
+enum class EventLoopFdEvents
+{
+    Zero = 0,                         /**< Zero value representing no events. */
+    Read = 1 << 0,                    /**< Ready for reading. */
+    Write = 1 << 1,                   /**< Ready for writing. */
+    Error = 1 << 2,                   /**< Error occurred. */
+    Hup = 1 << 3,                     /**< Hangup occurred. */
+    All = Read | Write | Error | Hup, /**< Mask of all above event types listed above. */
 };
 #ifndef IN_DOXYGEN
 AIPSTACK_ENUM_BITFIELD(EventLoopFdEvents)
 #endif
 
 #ifndef IN_DOXYGEN
-class EventProviderFdBase {
+class EventProviderFdBase
+{
 public:
-    inline EventProviderBase & getProvider () const;
-    inline void sanityCheck () const;
-    inline int getFd () const;
-    inline EventLoopFdEvents getFdEvents () const;
-    inline bool callFdEventHandler (EventLoopFdEvents events);
+    inline EventProviderBase &getProvider() const;
+    inline void sanityCheck() const;
+    inline int getFd() const;
+    inline EventLoopFdEvents getFdEvents() const;
+    inline bool callFdEventHandler(EventLoopFdEvents events);
 };
 #endif
 
@@ -174,6 +182,6 @@ public:
 
 /** @} */
 
-}
+} // namespace AIpStack
 
 #endif

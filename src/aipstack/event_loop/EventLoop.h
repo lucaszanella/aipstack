@@ -38,7 +38,10 @@
 #include <aipstack/structure/minimum/LinkedHeap.h>
 #include <aipstack/event_loop/EventLoopCommon.h>
 
-#if defined(__linux__)
+//Makes AIPStack OS-independent by using virtual evend providers
+#if defined(__VIRTUAL_AIP_STACK__)
+#include <aipstack/event_loop/platform_specific/EventProviderVirtual.h>
+#elif defined(__linux__)
 #include <aipstack/event_loop/platform_specific/EventProviderLinux.h>
 #elif defined(_WIN32)
 #include <aipstack/event_loop/platform_specific/EventProviderWindows.h>

@@ -36,36 +36,37 @@
 #include <aipstack/infra/Buf.h>
 #include <aipstack/event_loop/EventLoop.h>
 
-namespace AIpStack {
+namespace AIpStack
+{
 
-class TapDeviceVirtual :
-    private AIpStack::NonCopyable<TapDeviceVirtual>
+class TapDeviceVirtual : private AIpStack::NonCopyable<TapDeviceVirtual>
 {
 public:
     using FrameReceivedHandler = Function<void(AIpStack::IpBufRef frame)>;
 
-    TapDeviceVirtual (AIpStack::EventLoop &loop, std::string const &device_id,
-                    FrameReceivedHandler handler);
-    
-    ~TapDeviceVirtual ();
-    
-    std::size_t getMtu () const;
+    TapDeviceVirtual(AIpStack::EventLoop &loop, std::string const &device_id,
+                     FrameReceivedHandler handler);
 
-    AIpStack::IpErr sendFrame (AIpStack::IpBufRef frame);
+    ~TapDeviceVirtual();
+
+    std::size_t getMtu() const;
+
+    AIpStack::IpErr sendFrame(AIpStack::IpBufRef frame);
 
 private:
-    void handleFdEvents (AIpStack::EventLoopFdEvents events);
+    //void handleFdEvents (AIpStack::EventLoopFdEvents events);
+    void receive();
 
 private:
     FrameReceivedHandler m_handler;
-    AIpStack::FileDescriptorWrapper m_fd;
-    AIpStack::EventLoopFdWatcher m_fd_watcher;
+    //AIpStack::FileDescriptorWrapper m_fd;
+    //AIpStack::EventLoopFdWatcher m_fd_watcher;
     std::size_t m_frame_mtu;
-    std::vector<char> m_read_buffer;
-    std::vector<char> m_write_buffer;
-    bool m_active;    
+    //std::vector<char> m_read_buffer;
+    //std::vector<char> m_write_buffer;
+    bool m_active;
 };
 
-}
+} // namespace AIpStack
 
 #endif
