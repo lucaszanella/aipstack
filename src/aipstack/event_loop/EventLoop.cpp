@@ -108,6 +108,13 @@ EventLoop::EventLoop () :
     EventProvider()
 {}
 
+#if defined(__VIRTUAL_AIP_STACK__)
+EventLoop::EventLoop(std::shared_ptr<EventBridge> event_bridge) :
+    EventLoopMembers(),
+    EventProvider(event_bridge)
+{}
+#endif //__VIRTUAL_AIP_STACK__
+
 EventLoop::~EventLoop ()
 {
     AIPSTACK_ASSERT(m_num_timers == 0);

@@ -114,6 +114,14 @@ EventProviderVirtual::EventProviderVirtual () :
     */
 }
 
+EventProviderVirtual::EventProviderVirtual (std::shared_ptr<EventBridge> event_bridge) :
+    m_event_bridge(event_bridge),
+    m_timerfd_time(EventLoopTime::max()),
+    m_force_timerfd_update(true),
+    m_cur_epoll_event(0),
+    m_num_epoll_events(0)
+{
+
 EventProviderVirtual::~EventProviderVirtual ()
 {}
 
@@ -137,7 +145,7 @@ void EventProviderVirtual::waitForEvents (EventLoopTime wait_time)
 
     if (wait_time != m_timerfd_time || m_force_timerfd_update) {
         m_force_timerfd_update = true;
-
+        /*
         EventLoopTime::duration time_dur = wait_time.time_since_epoch();
 
         SecType sec = time_dur.count() / Period::den;
@@ -161,13 +169,14 @@ void EventProviderVirtual::waitForEvents (EventLoopTime wait_time)
             throw std::runtime_error(formatString(
                 "EventProviderVirtual: timerfd_settime failed, err=%d", errno));
         }
-
+        */
         m_timerfd_time = wait_time;
         m_force_timerfd_update = false;
     }
 
-    int wait_res;
+    //int wait_res;
     while (true) {
+        /*
         wait_res = ::epoll_wait(*m_epoll_fd, m_epoll_events, MaxEpollEvents, -1);
         if (AIPSTACK_LIKELY(wait_res >= 0)) {
             break;
@@ -178,9 +187,11 @@ void EventProviderVirtual::waitForEvents (EventLoopTime wait_time)
             throw std::runtime_error(formatString(
                 "EventProviderVirtual: epoll_wait failed, err=%d", err));
         }
+        */
+       m_event_bridge->waitForEvents(wait_time);
     }
 
-    AIPSTACK_ASSERT(wait_res <= MaxEpollEvents);
+    //AIPSTACK_ASSERT(wait_res <= MaxEpollEvents);
 
     m_cur_epoll_event = 0;
     m_num_epoll_events = wait_res;
@@ -252,6 +263,7 @@ void EventProviderVirtual::signalToCheckAsyncSignals ()
     }
 }
 
+/*
 void EventProviderVirtual::control_epoll (
     int op, int fd, std::uint32_t events, void *data_ptr)
 {
@@ -264,6 +276,7 @@ void EventProviderVirtual::control_epoll (
             "EventProviderVirtual: epoll_ctl failed, err=%d", errno));
     }
 }
+*/
 
 void EventProviderVirtualFd::initFdImpl (int fd, EventLoopFdEvents events)
 {

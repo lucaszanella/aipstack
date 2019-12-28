@@ -27,6 +27,7 @@
 
 #include <cstdint>
 #include <mutex>
+#include <memory>
 
 #include <aipstack/misc/NonCopyable.h>
 #include <aipstack/misc/OneOf.h>
@@ -37,7 +38,7 @@
 #include <aipstack/structure/LinkedList.h>
 #include <aipstack/structure/minimum/LinkedHeap.h>
 #include <aipstack/event_loop/EventLoopCommon.h>
-
+#include <aipstack/event_loop/EventBridge.h>
 //Makes AIPStack OS-independent by using virtual evend providers
 #if defined(__VIRTUAL_AIP_STACK__)
 #include <aipstack/event_loop/platform_specific/EventProviderVirtual.h>
@@ -199,6 +200,17 @@ public:
      * @throw std::bad_alloc If a memory allocation error occurs.
      */
     EventLoop ();
+
+    /**
+     * Construct the event loop.
+     * 
+     * @throw std::runtime_error If an error occurs in platform-specific initialization of
+     *        event facilities.
+     * @throw std::bad_alloc If a memory allocation error occurs.
+     */
+    #if defined(__VIRTUAL_AIP_STACK__)
+    EventLoop(std::shared_ptr<EventBridge> eventBridge);
+    #endif //__VIRTUAL_AIP_STACK__
 
     /**
      * Destruct the event loop.

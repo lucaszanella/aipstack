@@ -28,14 +28,17 @@
 #include <cstdint>
 
 #include <sys/epoll.h>
+#include <memory>
 
 #include <aipstack/misc/NonCopyable.h>
 #include <aipstack/misc/platform_specific/FileDescriptorWrapper.h>
 #include <aipstack/event_loop/EventLoopCommon.h>
+#include <aipstack/event_loop/EventBridge.h>
+
 
 namespace AIpStack {
 
-class EventProviderVirtualFd;
+//class EventProviderVirtualFd;
 
 class EventProviderVirtual :
     public EventProviderBase,
@@ -48,6 +51,8 @@ class EventProviderVirtual :
 public:
     EventProviderVirtual ();
 
+    EventProviderVirtual(std::shared_ptr<EventBridge> eventBridge);
+
     ~EventProviderVirtual ();
 
     void waitForEvents (EventLoopTime wait_time);
@@ -57,7 +62,7 @@ public:
     void signalToCheckAsyncSignals ();
 
 private:
-    void control_epoll (int op, int fd, std::uint32_t events, void *data_ptr);
+    //void control_epoll (int op, int fd, std::uint32_t events, void *data_ptr);
 
 private:
     //FileDescriptorWrapper m_epoll_fd;
@@ -65,11 +70,12 @@ private:
     FileDescriptorWrapper m_event_fd;
     EventLoopTime m_timerfd_time;
     bool m_force_timerfd_update;
+    std::shared_ptr<EventBridge> m_event_bridge;
     //int m_cur_epoll_event;
     //int m_num_epoll_events;
     //struct epoll_event m_epoll_events[MaxEpollEvents];
 };
-
+/*
 class EventProviderVirtualFd :
     public EventProviderFdBase,
     private NonCopyable<EventProviderVirtualFd>
@@ -84,7 +90,7 @@ public:
 private:
     inline EventProviderVirtual & getProvider () const;
 };
-
+*/
 using EventProvider = EventProviderVirtual;
 //using EventProviderFd = EventProviderVirtualFd;
 
