@@ -51,7 +51,7 @@ class EventProviderVirtual :
 public:
     EventProviderVirtual ();
 
-    EventProviderVirtual(std::shared_ptr<EventBridge> eventBridge);
+    EventProviderVirtual(std::shared_ptr<EventBridge> event_bridge);
 
     ~EventProviderVirtual ();
 
@@ -66,8 +66,8 @@ private:
 
 private:
     //FileDescriptorWrapper m_epoll_fd;
-    FileDescriptorWrapper m_timer_fd;
-    FileDescriptorWrapper m_event_fd;
+    //FileDescriptorWrapper m_timer_fd;
+    //FileDescriptorWrapper m_event_fd;
     EventLoopTime m_timerfd_time;
     bool m_force_timerfd_update;
     std::shared_ptr<EventBridge> m_event_bridge;

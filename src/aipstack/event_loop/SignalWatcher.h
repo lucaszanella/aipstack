@@ -30,7 +30,9 @@
 #include <aipstack/event_loop/EventLoop.h>
 #include <aipstack/event_loop/SignalWatcherCommon.h>
 
-#if defined(__linux__)
+#if defined(__VIRTUAL_AIP_STACK__)
+#include <aipstack/event_loop/platform_specific/SignalWatcherImplVirtual.h>
+#elif defined(__linux__)
 #include <aipstack/event_loop/platform_specific/SignalWatcherImplLinux.h>
 #elif defined(_WIN32)
 #include <aipstack/event_loop/platform_specific/SignalWatcherImplWindows.h>

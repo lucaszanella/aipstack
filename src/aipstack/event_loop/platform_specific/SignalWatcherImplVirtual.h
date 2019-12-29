@@ -22,43 +22,60 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AIPSTACK_EVENT_BRIDGE_H
-#define AIPSTACK_EVENT_BRIDGE_H
-#include <mutex>
-#include <condition_variable>
+#ifndef AIPSTACK_SIGNAL_WATCHER_IMPL_VIRTUAL_H
+#define AIPSTACK_SIGNAL_WATCHER_IMPL_VIRTUAL_H
 
-namespace AIpStack
+#include <aipstack/misc/NonCopyable.h>
+#include <aipstack/misc/platform_specific/FileDescriptorWrapper.h>
+#include <aipstack/event_loop/EventLoop.h>
+#include <aipstack/event_loop/SignalWatcherCommon.h>
+
+namespace AIpStack {
+
+class SignalWatcherImplVirtual;
+
+class SignalCollectorImplVirtual :
+    public SignalCollectorImplBase,
+    private NonCopyable<SignalCollectorImplVirtual>
 {
-class EventBridge
-{
+    friend class SignalWatcherImplVirtual;
+    
 public:
-    EventBridge()
-    {
-    }
+    SignalCollectorImplVirtual ();
 
-    template <typename T>
-    void waitForEvents(T time)
-    {
-        {
-            std::unique_lock<std::mutex> lock(mutex);
-            condition_variable.wait(lock, time, [] { return trigger; });
-            _trigger = false;
-        }
-    }
-
-    void trigger()
-    {
-        {
-            std::unique_lock<std::mutex> lock(mutex);
-            _trigger = true;
-        }
-        condition_variable.notify_one();
-    }
+    ~SignalCollectorImplVirtual ();
 
 private:
-    bool _trigger = false;
-    std::mutex mutex;
-    std::condition_variable condition_variable;
+    SignalType m_orig_blocked_signals;
 };
-} // namespace AIpStack
-#endif //AIPSTACK_EVENT_BRIDGE_H
+
+class SignalWatcherImplVirtual :
+    public SignalWatcherImplBase,
+    private NonCopyable<SignalWatcherImplVirtual>
+{
+public:
+    SignalWatcherImplVirtual ();
+
+    ~SignalWatcherImplVirtual ();
+
+private:
+    inline SignalCollectorImplVirtual & getCollector () const;
+
+    void fdWatcherHandler(EventLoopFdEvents events);
+    
+private:
+    // First fd then watcher for proper destruction order.
+    //FileDescriptorWrapper m_signalfd_fd;
+    //EventLoopFdWatcher m_fd_watcher;
+};
+
+using SignalCollectorImpl = SignalCollectorImplVirtual;
+
+using SignalWatcherImpl = SignalWatcherImplVirtual;
+
+#define AIPSTACK_SIGNAL_WATCHER_IMPL_IMPL_FILE \
+    <aipstack/event_loop/platform_specific/SignalWatcherImplVirtual_impl.h>
+
+}
+
+#endif

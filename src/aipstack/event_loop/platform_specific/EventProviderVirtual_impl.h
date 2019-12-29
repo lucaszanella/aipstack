@@ -201,6 +201,10 @@ bool EventProviderVirtual::dispatchEvents ()
 {
     using namespace EventProviderVirtualPriv;
 
+    //Do something with events from m_event_bridge
+
+
+    /*
     while (m_cur_epoll_event < m_num_epoll_events) {
         struct epoll_event *ev = &m_epoll_events[m_cur_epoll_event++];
         void *data_ptr = ev->data.ptr;
@@ -245,12 +249,14 @@ bool EventProviderVirtual::dispatchEvents ()
             }
         }
     }
+    */
 
     return true;
 }
 
 void EventProviderVirtual::signalToCheckAsyncSignals ()
 {
+    /*
     std::uint64_t value = 1;
     auto res = ::write(*m_event_fd, &value, sizeof(value));
 
@@ -261,6 +267,7 @@ void EventProviderVirtual::signalToCheckAsyncSignals ()
                 "EventProviderVirtual: write to eventfd failed, err=%d\n", err);
         }
     }
+    */
 }
 
 /*
@@ -277,7 +284,7 @@ void EventProviderVirtual::control_epoll (
     }
 }
 */
-
+/*
 void EventProviderVirtualFd::initFdImpl (int fd, EventLoopFdEvents events)
 {
     using namespace EventProviderVirtualPriv;
@@ -333,5 +340,5 @@ EventProviderVirtual & EventProviderVirtualFd::getProvider () const
 {
     return static_cast<EventProviderVirtual &>(EventProviderFdBase::getProvider());
 }
-
+*/
 }

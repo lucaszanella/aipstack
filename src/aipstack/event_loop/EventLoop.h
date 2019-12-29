@@ -209,7 +209,7 @@ public:
      * @throw std::bad_alloc If a memory allocation error occurs.
      */
     #if defined(__VIRTUAL_AIP_STACK__)
-    EventLoop(std::shared_ptr<EventBridge> eventBridge);
+    EventLoop(std::shared_ptr<EventBridge> event_bridge);
     #endif //__VIRTUAL_AIP_STACK__
 
     /**
